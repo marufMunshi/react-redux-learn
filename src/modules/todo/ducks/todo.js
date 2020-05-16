@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
+import { createSlice } from "@reduxjs/toolkit";
 
-export const ADD = "ADD";
-export const TOGGLE = "TOGGLE";
 export const filterTypes = {
   SHOW_ALL: "all",
   ACTIVE: "active",
@@ -13,53 +12,28 @@ const INITIAL_STATE = {
   list: [],
 };
 
-const todoReducer = (state = INITIAL_STATE, action) => {
-  switch (action.type) {
-    case ADD: {
-      return {
-        ...state,
-        list: [
-          ...state.list,
-          {
-            id: uuidv4(),
-            text: action.text,
-            completed: false,
-          },
-        ],
-      };
-    }
-    case TOGGLE: {
-      return {
-        ...state,
-        list: state.list.map((t) => ({
-          ...t,
-          completed: t.id === action.id ? !t.completed : t.completed,
-        })),
-      };
-    }
-    case filterTypes.SHOW_ALL:
-    case filterTypes.ACTIVE:
-    case filterTypes.COMPLETED: {
-      return {
-        ...state,
-        visibilityFilter: action.type,
-      };
-    }
-    default:
-      return state;
-  }
-};
-
-export const addTodo = (text) => {
-  return {
-    type: ADD,
-    text,
-  };
-};
-
-export const filterTodos = (filterType) => ({ type: filterType });
-
-export const toogleTodoState = (id) => ({ type: TOGGLE, id });
+const todosSlice = createSlice({
+  name: "todos",
+  initialState: INITIAL_STATE,
+  reducers: {
+    addTodo(state, action) {
+      state.list.push({
+        id: uuidv4(),
+        text: action.payload,
+        completed: false,
+      });
+    },
+    toggleTodo(state, action) {
+      state.list = state.list.map((t) => ({
+        ...t,
+        completed: t.id === action.payload ? !t.completed : t.completed,
+      }));
+    },
+    addFilterType(state, action) {
+      state.visibilityFilter = action.payload;
+    },
+  },
+});
 
 export const getVisibleTodos = (todos, filter) => {
   switch (filter) {
@@ -74,4 +48,6 @@ export const getVisibleTodos = (todos, filter) => {
   }
 };
 
-export default todoReducer;
+export const { addTodo, toggleTodo, addFilterType } = todosSlice.actions;
+
+export default todosSlice.reducer;
